@@ -1,9 +1,11 @@
-const path = require('path');
-const fs = require('fs');
-const authorController = require('../controller/authorController')
-const Article = require('../model/article')
+const path = require("path");
+const fs = require("fs");
+const authorController = require("../controller/authorController");
+const Article = require("../model/Article");
+const User = require("../model/user");
 
-
+var like = new Boolean(false)
+let lista = [];
 class ArticleController {
   static createLog(error) {
     const timestamp = Date.now();
@@ -45,6 +47,42 @@ class ArticleController {
       return res
         .status(500)
         .send({ error: "Falha ao salvar o artigo", data: error.message });
+    }
+  }
+
+  static async likeArticle(req, res) {
+    const { idUser, id } = req.params;
+
+    if (!idUser || !id) return res.status(400).send({ message: "No id provider" });
+    try {
+      const article = await Article.findById(id);
+      const user = await User.findById(idUser);
+
+
+      if(!lista.includes(user)){
+        if(like)
+        {
+          await Article.findByIdAndUpdate({ _id: id }, { likes: ++article.likes });
+          like = false;
+          lista.push(user);
+          // console.log(like);
+          // console.log("aqui");
+          return res.status(200).send();
+        }
+      }
+
+      if(!like)
+      {
+        await Article.findByIdAndUpdate({ _id: id }, { likes: --article.likes });
+        like = true;
+        // console.log(like);
+        return res.status(200).send();
+      }
+    } catch (error) {
+      ArticleController.createLog(error);
+      return res
+        .status(500)
+        .send({ error: "Falha ao curtir", data: error.message });
     }
   }
 }

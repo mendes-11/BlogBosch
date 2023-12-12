@@ -1,5 +1,5 @@
 const { Author } = require("../model/Author");
-const User = require("../model/login");
+const User = require("../model/user");
 
 class AuthorController {
   static async create(req, res) {
